@@ -3,5 +3,5 @@ A simple script for compiling and executing java source files within packages wi
 
 ## Possible Uses
 * Sublime Text: Copy `Java.sublime-build` to your sublime text user packages folder and make a new directory called `JavaCompiler`. Then copy `Compile.java` into that folder and compile it in the same directory (creating `Compile.class` and `PrintThread.class`) Now you can run java code with packages through sublime text.
-* Shell Script: As root, copy `Compile.java` to '/usr/local/share/javac-src/' and compile it in the same directory (creating `Compile.class` and `PrintThread.class`) Then copy `javac-src.sh` to `/usr/local/bin/` and use it to compile and run java code with packages through the terminal.
+* Shell Script: As root, copy `Compile.java` to `/usr/local/share/javac-src/` and compile it in the same directory (creating `Compile.class` and `PrintThread.class`) Then copy `javac-src.sh` to `/usr/local/bin/` and use it to compile and run java code with packages through the terminal.
 
