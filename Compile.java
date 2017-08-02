@@ -1,8 +1,5 @@
 import java.io.IOException;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -43,7 +40,6 @@ public class Compile {
 		String relPath;
 		String absolutePath;
 		Process process;
-		PrintThread printer;
 		int err;
 
 		testFile = new File(path);
@@ -74,9 +70,7 @@ public class Compile {
 				}
 
 				//compile
-				process = (new ProcessBuilder("javac", "-d", rootPath+bin+slash, "-cp", rootPath+src+slash, absolutePath)).redirectErrorStream(true).start();
-				printer = new PrintThread(process.getInputStream());
-				printer.start();
+				process = (new ProcessBuilder("javac", "-d", rootPath+bin+slash, "-cp", rootPath+src+slash, absolutePath)).inheritIO().start();
 				err = process.waitFor();
 				if (err != 0) {
 					error("Error: Could not compile '" + path + "'", err);
@@ -89,9 +83,7 @@ public class Compile {
 				//execute
 				if (execute) {
 					relPath = testJava.matcher(relPath).replaceAll("");
-					process = (new ProcessBuilder("java", "-cp", rootPath+bin+slash, relPath)).redirectErrorStream(true).start();
-					printer = new PrintThread(process.getInputStream());
-					printer.start();
+					process = (new ProcessBuilder("java", "-cp", rootPath+bin+slash, relPath)).inheritIO().start();
 					err = process.waitFor();
 					if (err != 0) {
 						error("Error: Failed to run '" + path + "'", err);
@@ -122,39 +114,4 @@ public class Compile {
 		}
 	}
 
-}
-
-/**
- * Given an InputStream and an optional error message, the PrintThread class
- * prints the stream to the console when the thread is started.
- */
-class PrintThread extends Thread {
-	InputStream in;
-	String errMsg;
-	public PrintThread(InputStream in) {
-		super();
-		this.in = in;
-		this.errMsg = "Error: Could not read input stream";
-	}
-	public PrintThread(InputStream in, String errMsg) {
-		super();
-		this.in = in;
-		this.errMsg = errMsg;
-	}
-	public void run() {
-		try {
-			InputStreamReader streamReader = new InputStreamReader(in);
-			BufferedReader bufferedReader = new BufferedReader(streamReader);
-			String line = bufferedReader.readLine();
-			while (line != null) {
-				System.out.println(line);
-				line = bufferedReader.readLine();
-			}
-			bufferedReader.close();
-			streamReader.close();
-			in.close();
-		} catch (IOException e) {
-			System.err.println(errMsg);
-		}
-	}
 }
