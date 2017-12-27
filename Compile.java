@@ -14,6 +14,7 @@ public class Compile {
 
 	private static final String src = "src";
 	private static final String bin = "bin";
+	private static final String lib = "lib";
 	private static final String slash = File.separator;
 	private static final String javaFileExt = ".java";
 
@@ -39,6 +40,7 @@ public class Compile {
 		String rootPath;
 		String relPath;
 		String absolutePath;
+		String jarIncludes;
 		Process process;
 		int err;
 
@@ -69,8 +71,15 @@ public class Compile {
 					testFile.mkdir();
 				}
 
+				//search lib folder
+				jarIncludes = "";
+				testFile = new File(rootPath+lib+slash);
+				if (testFile.exists() && testFile.list().length > 0) {
+					jarIncludes = ":"+rootPath+lib+slash+"*";
+				}
+
 				//compile
-				process = (new ProcessBuilder("javac", "-d", rootPath+bin+slash, "-cp", rootPath+src+slash, absolutePath)).inheritIO().start();
+				process = (new ProcessBuilder("javac", "-d", rootPath+bin+slash, "-cp", rootPath+src+slash+jarIncludes, absolutePath)).inheritIO().start();
 				err = process.waitFor();
 				if (err != 0) {
 					error("Error: Could not compile '" + path + "'", err);
@@ -83,7 +92,7 @@ public class Compile {
 				//execute
 				if (execute) {
 					relPath = testJava.matcher(relPath).replaceAll("");
-					process = (new ProcessBuilder("java", "-cp", rootPath+bin+slash, relPath)).inheritIO().start();
+					process = (new ProcessBuilder("java", "-cp", rootPath+bin+slash+jarIncludes, relPath)).inheritIO().start();
 					err = process.waitFor();
 					if (err != 0) {
 						error("Error: Failed to run '" + path + "'", err);
